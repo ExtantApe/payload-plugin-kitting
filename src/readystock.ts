@@ -148,7 +148,7 @@ export async function sendStockAlerts(payload: Payload): Promise<{ sent: number;
 }
 
 async function deliverStock(payload: Payload, o: ResolvedSupplies, recipe: Doc): Promise<{ status: AlertStatus; note: string | null }> {
-  if (!(await o.canSend({ payload }))) return { status: 'not-sent', note: 'Email is off here.' }
+  if ((await o.canSend({ payload })) !== true) return { status: 'not-sent', note: 'Email is off here.' }
   const status = await readyStatus(payload, recipe)
   if (!status.state || status.state === 'ok') return { status: 'not-sent', note: 'Back to OK before it was sent.' }
   const scope = o.scopeField ? idOf(recipe[o.scopeField]) : null

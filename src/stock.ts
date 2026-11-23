@@ -598,7 +598,7 @@ export function defaultAlertEmail({ item, adminURL }: { item: AlertItem; adminUR
 }
 
 async function deliver(payload: Payload, o: ResolvedSupplies, item: Doc, req?: Req): Promise<{ status: AlertStatus; note: string | null }> {
-  if (!(await o.canSend({ payload }))) return { status: 'not-sent', note: 'Email is off here.' }
+  if ((await o.canSend({ payload })) !== true) return { status: 'not-sent', note: 'Email is off here.' }
   const alertItem = await alertItemOf(payload, o, item, req)
   const to = [...new Set((Array.isArray(o.recipients) ? o.recipients : await o.recipients({ payload, item: alertItem })).map((a) => a.trim()).filter(Boolean))]
   if (!to.length) return { status: 'not-sent', note: 'No alert addresses are set.' }
