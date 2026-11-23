@@ -252,7 +252,7 @@ With `scopeField`, a recipe key needs its site: `{ key, scope }`. `{ id }` works
 | `lots.warningDays` | `14` | How soon before its use-by date a lot shows under "Use soon". Items can set their own |
 | `lots.autoWriteOff` | `true` | Write off expired lots when the overview opens |
 | `alerts.recipients` | none | A list, or `({ payload, item }) => string[]` (`item.scope` is the site) |
-| `alerts.canSend` | always | Return false where email is off, for example in development |
+| `alerts.canSend` | always | Return false where email is off, for example in development. Only an exact `true` sends |
 | `alerts.sendEmail` | `payload.sendEmail` | Your own delivery |
 | `alerts.render` | a short plain message | Your own subject, HTML and text |
 | `overrides` | none | Change each collection before it's added, for example to add a tenant field or hooks |

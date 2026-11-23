@@ -14,7 +14,7 @@ let mongo: MongoMemoryReplSet
 const mail: { to: string[]; subject: string; text: string }[] = []
 const onBuilt: string[] = []
 let refuseBuild = ''
-let emailOn = true
+let emailOn: unknown = true
 
 const ids = (v: unknown) => ((v as unknown[]) ?? []).map((t) => (t && typeof t === 'object' ? String((t as Doc).id) : String(t)))
 /** Site staff manage their own sites; viewers only read; admins everything. */
@@ -60,7 +60,7 @@ beforeAll(async () => {
           access: { manage: siteAccess(['staff']), read: siteAccess(['staff', 'viewer']) },
           alerts: {
             recipients: ({ item }) => [`stock-${String(item.scope)}@example.com`],
-            canSend: () => emailOn,
+            canSend: () => emailOn as boolean,
             sendEmail: async ({ to, subject, text }) => void mail.push({ to, subject, text }),
           },
           overrides: { items: withTenant, suppliers: withTenant, movements: withTenant, recipes: withTenant, lots: withTenant, units: withTenant, requests: withTenant, boxes: withTenant, postage: withTenant, settings: withTenant },
@@ -262,6 +262,16 @@ describe('low-stock email', () => {
     emailOn = true
     await applyRecipe(payload, { key }, 1, { scope: siteA.id }) // still below: no catch-up email
     expect(mail).toHaveLength(0)
+  })
+
+  it('sends only on an exact true from canSend: a truthy answer leaves email off', async () => {
+    for (const answer of ['yes', 1, {}, [], 'false']) {
+      const { swab, key } = await setup(siteA, { swab: 10, tube: 100 }, { swab: 10 })
+      emailOn = answer
+      await applyRecipe(payload, { key }, 1, { scope: siteA.id })
+      expect(mail).toHaveLength(0)
+      expect(await get('supply-items', swab.id)).toMatchObject({ alertStatus: 'not-sent', alertNote: 'Email is off here.' })
+    }
   })
 
   it('alerts when the level is raised above what is on hand', async () => {
@@ -836,6 +846,15 @@ describe('ready-stock states and their emails', () => {
     await sendPendingAlerts(payload)
     expect(await get('supply-recipes', recipe.id)).toMatchObject({ stockState: 'build-more', stockAlertStatus: 'not-sent', stockAlertNote: 'Email is off here.' })
     expect(mail.filter((m) => m.subject.includes('Quiet kit'))).toHaveLength(0)
+  })
+
+  it('records ready-stock email as not sent when canSend answers truthy but not true', async () => {
+    emailOn = 'yes'
+    const swab = await create('supply-items', { tenant: siteA.id, name: 'Truthy swab', unit: 'each', openingStock: 10 })
+    const recipe = await create('supply-recipes', { tenant: siteA.id, name: 'Truthy kit', key: `tk-${Math.random().toString(36).slice(2, 8)}`, lines: [{ item: swab.id, quantity: 1 }], readyStock: { baseline: 2 } })
+    await sendPendingAlerts(payload)
+    expect(await get('supply-recipes', recipe.id)).toMatchObject({ stockState: 'build-more', stockAlertStatus: 'not-sent', stockAlertNote: 'Email is off here.' })
+    expect(mail.filter((m) => m.subject.includes('Truthy kit'))).toHaveLength(0)
   })
 })
 
