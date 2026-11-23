@@ -15,7 +15,7 @@ const scopeWhere = (o: ResolvedSupplies, scope: ID | null): Where[] => (o.scopeF
 
 async function readyUnits(payload: Payload, o: ResolvedSupplies, req: Req, recipe: Doc, limit: number) {
   const where: Where = { and: [{ recipe: { equals: recipe.id } }, { status: { equals: 'ready' } }, ...scopeWhere(o, o.scopeField ? idOf(recipe[o.scopeField]) : null)] }
-  return (await payload.find({ collection: o.units as CollectionSlug, where, sort: ['builtAt', 'id'], limit, pagination: true, ...sys, joins: false, req })).docs as Doc[]
+  return (await payload.find({ collection: o.units as CollectionSlug, where, sort: ['builtAt', 'id'], limit, pagination: false, ...sys, joins: false, req })).docs as Doc[]
 }
 
 const setUnit = (payload: Payload, o: ResolvedSupplies, req: Req, id: ID, data: Doc) =>
