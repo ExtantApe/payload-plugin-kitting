@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 (2026-11-26)
 
 - **`alerts.canSend` must answer exactly `true` to send.** A truthy answer such as `'yes'` or `1` used to send email; now it counts as email off, and the alert is recorded as not sent.
+
+- **Fix: finds that can run inside a transaction no longer paginate.** A paginated find makes Payload's Mongo adapter send the find and its count together on the request's session. When that is the first query in a transaction, the two race to start it and one can fail with `NoSuchTransaction`. These finds only use the rows, so they now pass `pagination: false`; any limit still applies. Lists that page for people are unchanged. Tested: the full suite, 92 tests at release. Not tested: the race itself, which isn't reproduced here.
 
 - **Build at packing, straight into one order:** `buildUnits(payload, recipe, ids, { scope, assignTo: 'Order 1042' })`. The new units go to that order first. They fill its waiting build request, or take the place of units kept for it, which go back to ready and can fill other waiting requests. An order holding nothing of the recipe, including one whose units have all shipped, is refused with `nothingReserved`, and nothing is built. The result's `assigned` says which unit went where. Agreed with Kits for its packing station.
 
