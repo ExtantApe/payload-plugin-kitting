@@ -9,7 +9,7 @@ const UNSAFE = /[\u0000- \u007f\\"'<>`]/
 
 /**
  * A `mailto:` link for one plain address, or null. Anything that could add mail fields or more recipients
- * (`?`, `&`, `#`, `%`, `,`, `;`) or isn't a single `name@domain.tld` is refused.
+ * (`?`, `&`, `#`, `%`, `,`, `;`) or isn’t a single address with a dotted domain is refused.
  */
 export function mailtoHref(email: unknown): string | null {
   if (typeof email !== 'string' || email.length > 254 || UNSAFE.test(email)) return null
