@@ -2,6 +2,15 @@
 
 Each audit maps what the plugin promises (README, docs/decisions.md) to the tests that prove it, then lists the gaps added and the gaps skipped, with the reason.
 
+## 2026-11-26, supplier contact link follow-ups (K808)
+
+Suite: 98 tests before, 103 after (`npx vitest run`). From the review of the K806 change.
+
+- **Promises:** a phone number links only when the text is shaped like one; a website link shows its host and opens the checked address; an address with a port is accepted with or without its scheme; every contact link has a name a screen reader can say; anything unsafe is plain text.
+- **Added:** in `test/links.test.ts`, the phone shape (17 values that must stay text), ports (11 forms that must still be refused, scheme-like and user-name ones included), `websiteHost` refusing whatever `websiteHref` refuses, and the website field accepting a bare address with a port. New `test/supplies-render.test.tsx` renders the Supplies page to HTML (Payload's shell stubbed, a made-up stock report) and checks each link's `href`, text and `aria-label`, and that unsafe details render as bare `<span>` text. Each new test fails on 0.3.1.
+- **Mutation checks:** 9 mutations, each restored. 8 fail the suite: the dot rule for a bare host with a port, the phone's minimum, maximum and shape check, the host swapped for the full address (in the helper and in the view), the `aria-label` removed, and the phone linked unchecked. One survives: dropping the rule that only `/`, `?`, `#` or the end may follow the port. The later checks (URL parsing, no user name or password) already refuse those values, so the rule is a second guard and stays.
+- **Skipped:** a real admin render, a real screen reader, and dialing from a real device.
+
 ## 2026-11-26, supplier contact links (K806)
 
 - **Promise:** the Supplies page never turns stored text into a link that runs script, opens another scheme or adds mail fields.

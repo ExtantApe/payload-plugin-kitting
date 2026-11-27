@@ -42,7 +42,7 @@ export {
   type StockRow,
 } from './stock.js'
 export { conversionFactor, normalizeUnit, unitsFor, type Pack } from './units.js'
-export { mailtoHref, telHref, websiteHref } from './links.js'
+export { mailtoHref, telHref, websiteHost, websiteHref } from './links.js'
 export type {
   AlertItem,
   AlertStatus,

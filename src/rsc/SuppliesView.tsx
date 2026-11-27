@@ -11,17 +11,30 @@ import { readyStatus, STATE_TEXT, type ReadyStatus } from '../readystock.js'
 import { restockArrivals } from '../restock.js'
 import { sendPendingAlerts, setupProgress, stockReport, suppliesOf, writeOffExpired, type StockRow } from '../stock.js'
 import type { Recommendation } from '../stocklevel.js'
-import { mailtoHref, telHref, websiteHref } from '../links.js'
+import { mailtoHref, telHref, websiteHost, websiteHref } from '../links.js'
 
-/** One supplier contact: a link when its target is safe to open, plain text when it isn't. */
-export const contact = (key: string, href: string | null, label: string, external = false) =>
+/**
+ * One supplier contact: a link when its target is safe to open, plain text when it isn't. `name` is what a screen
+ * reader says for the link. It always contains the text on screen, so voice control still finds it.
+ */
+export const contact = (key: string, href: string | null, label: string, external = false, name?: string) =>
   href ? (
-    <a key={key} href={href} {...(external ? { rel: 'noreferrer noopener', target: '_blank' } : {})}>
+    <a key={key} href={href} {...(name ? { 'aria-label': name } : {})} {...(external ? { rel: 'noreferrer noopener', target: '_blank' } : {})}>
       {label}
     </a>
   ) : (
     <span key={key}>{label}</span>
   )
+
+/** A supplier's email, phone and website, each linked only when it's safe to open. The website shows as its host. */
+export const supplierContacts = (supplier: NonNullable<StockRow['supplier']>) => {
+  const host = websiteHost(supplier.website)
+  return [
+    supplier.email && contact('e', mailtoHref(supplier.email), supplier.email, false, `Email ${supplier.email}`),
+    supplier.phone && contact('p', telHref(supplier.phone), supplier.phone, false, `Call ${supplier.phone}`),
+    supplier.website && contact('w', websiteHref(supplier.website), host ?? supplier.website, true, `Website: ${host} (opens in a new tab)`),
+  ].filter(Boolean)
+}
 
 const METHOD_NAMES: Record<string, string> = {
   statistical: 'Safety stock',
@@ -221,13 +234,7 @@ export async function SuppliesView({ initPageResult, params, searchParams }: Adm
                       <h3 style={{ margin: '0 0 4px' }}>{g.name}</h3>
                       {g.supplier && (g.supplier.email || g.supplier.phone || g.supplier.website) && (
                         <p style={{ margin: '0 0 8px' }}>
-                          {[
-                            g.supplier.email && contact('e', mailtoHref(g.supplier.email), g.supplier.email),
-                            g.supplier.phone && contact('p', telHref(g.supplier.phone), g.supplier.phone),
-                            g.supplier.website && contact('w', websiteHref(g.supplier.website), g.supplier.website, true),
-                          ]
-                            .filter(Boolean)
-                            .flatMap((el, i) => (i ? [' · ', el] : [el]))}
+                          {supplierContacts(g.supplier).flatMap((el, i) => (i ? [' · ', el] : [el]))}
                         </p>
                       )}
                       <table style={table}>
