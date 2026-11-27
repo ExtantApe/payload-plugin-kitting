@@ -92,3 +92,22 @@ describe('the admin views (test audit 2026-11-11)', () => {
     }
   })
 })
+
+describe('supplier contact line', async () => {
+  const { contact } = await import('../src/rsc/SuppliesView.js')
+  const { mailtoHref, websiteHref } = await import('../src/links.js')
+
+  it('shows an unsafe stored value as plain text, never as a link', () => {
+    const bad = contact('w', websiteHref('javascript:alert(1)'), 'javascript:alert(1)', true) as { type: unknown; props: Record<string, unknown> }
+    expect(bad.type).toBe('span')
+    expect(bad.props.href).toBeUndefined()
+    const mail = contact('e', mailtoHref('orders@example.com?bcc=spy@evil.example'), 'x') as { type: unknown }
+    expect(mail.type).toBe('span')
+  })
+
+  it('links a safe website in a new tab without passing the admin page along', () => {
+    const good = contact('w', websiteHref('example.com/order'), 'example.com/order', true) as { type: unknown; props: Record<string, unknown> }
+    expect(good.type).toBe('a')
+    expect(good.props).toMatchObject({ href: 'https://example.com/order', rel: 'noreferrer noopener', target: '_blank' })
+  })
+})

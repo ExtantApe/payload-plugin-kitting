@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1 (2026-11-26)
+
+- **Security fix: supplier contact details only become links when they're safe to open.** The Supplies page turned a supplier's stored email and website straight into links. An email like `orders@example.com?bcc=someone@elsewhere.example` added hidden mail fields, and the website check let other schemes through when the value was stored around the admin. Now an email links only when it's a single plain address, a website only when it's an http or https address with a real host and no user name or password (a bare `example.com/order` still gets `https://`), and a phone link carries only digits and one leading plus. Anything else shows as plain text. The website field refuses values that wouldn't open as a web page. `mailtoHref`, `websiteHref` and `telHref` are exported. Tested: 98 tests pass (6 new): the three helpers against script, data, file and mixed-case schemes, tabs, spaces, credentials and mail-field forms; the website field's check; and the contact line rendering a bad value as text and a good website as a new-tab link with `noreferrer`. Not tested: the page in a real admin.
+
 ## 0.3.0 (2026-11-26)
 
 - **`alerts.canSend` must answer exactly `true` to send.** A truthy answer such as `'yes'` or `1` used to send email; now it counts as email off, and the alert is recorded as not sent.

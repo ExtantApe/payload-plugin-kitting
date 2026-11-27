@@ -11,6 +11,17 @@ import { readyStatus, STATE_TEXT, type ReadyStatus } from '../readystock.js'
 import { restockArrivals } from '../restock.js'
 import { sendPendingAlerts, setupProgress, stockReport, suppliesOf, writeOffExpired, type StockRow } from '../stock.js'
 import type { Recommendation } from '../stocklevel.js'
+import { mailtoHref, telHref, websiteHref } from '../links.js'
+
+/** One supplier contact: a link when its target is safe to open, plain text when it isn't. */
+export const contact = (key: string, href: string | null, label: string, external = false) =>
+  href ? (
+    <a key={key} href={href} {...(external ? { rel: 'noreferrer noopener', target: '_blank' } : {})}>
+      {label}
+    </a>
+  ) : (
+    <span key={key}>{label}</span>
+  )
 
 const METHOD_NAMES: Record<string, string> = {
   statistical: 'Safety stock',
@@ -211,9 +222,9 @@ export async function SuppliesView({ initPageResult, params, searchParams }: Adm
                       {g.supplier && (g.supplier.email || g.supplier.phone || g.supplier.website) && (
                         <p style={{ margin: '0 0 8px' }}>
                           {[
-                            g.supplier.email && <a key="e" href={`mailto:${g.supplier.email}`}>{g.supplier.email}</a>,
-                            g.supplier.phone && <a key="p" href={`tel:${g.supplier.phone.replace(/[^+\d]/g, '')}`}>{g.supplier.phone}</a>,
-                            g.supplier.website && <a key="w" href={/^https?:\/\//.test(g.supplier.website) ? g.supplier.website : `https://${g.supplier.website}`} rel="noreferrer noopener" target="_blank">{g.supplier.website}</a>,
+                            g.supplier.email && contact('e', mailtoHref(g.supplier.email), g.supplier.email),
+                            g.supplier.phone && contact('p', telHref(g.supplier.phone), g.supplier.phone),
+                            g.supplier.website && contact('w', websiteHref(g.supplier.website), g.supplier.website, true),
                           ]
                             .filter(Boolean)
                             .flatMap((el, i) => (i ? [' · ', el] : [el]))}

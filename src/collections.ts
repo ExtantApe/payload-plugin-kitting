@@ -5,6 +5,7 @@ import type { ResolvedSupplies } from './types.js'
 import { refreshStockStates } from './readystock.js'
 import { STOCK_METHODS } from './stocklevel.js'
 import { normalizeUnit } from './units.js'
+import { websiteHref } from './links.js'
 
 const OPENING_LOT = 'kittingOpeningLot'
 
@@ -246,7 +247,7 @@ export function suppliersCollection(o: ResolvedSupplies): CollectionConfig {
           { name: 'phone', type: 'text', label: 'Phone', admin: { width: '50%' } },
         ],
       },
-      { name: 'website', type: 'text', label: 'Website or ordering page' },
+      { name: 'website', type: 'text', label: 'Website or ordering page', validate: (v: unknown) => (v == null || v === '' || websiteHref(v) ? true : 'Use a web address, like example.com/order or https://example.com/order.') },
       { name: 'leadTimeDays', type: 'number', min: 0, label: 'Usual days to deliver' },
       { name: 'notes', type: 'textarea', label: 'Notes', admin: { description: 'Account details you need to order. Never passwords or card numbers.' } },
     ],
