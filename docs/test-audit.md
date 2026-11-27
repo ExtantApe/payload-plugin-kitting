@@ -2,6 +2,13 @@
 
 Each audit maps what the plugin promises (README, docs/decisions.md) to the tests that prove it, then lists the gaps added and the gaps skipped, with the reason.
 
+## 2026-11-26, supplier contact links (K806)
+
+- **Promise:** the Supplies page never turns stored text into a link that runs script, opens another scheme or adds mail fields.
+- **Gap found:** the supplier email and website went straight into `href` with no test. Fixed in 0.3.1.
+- **Added:** `test/links.test.ts` (each helper, and the website field's check) and two contact-line render tests in `test/views.test.ts`. They fail on 0.3.0, where the helpers and the check don't exist.
+- **Skipped:** a real admin render. The view tests already stub Payload's shell.
+
 ## 2026-11-08, first audit (after layers 1 and 2 and the stock methods)
 
 49 tests: 18 pure (`test/units.test.ts`, `test/stocklevel.test.ts`, `test/contracts.test.ts`) and 31 against an in-memory MongoDB replica set (`test/kitting.test.ts`).
