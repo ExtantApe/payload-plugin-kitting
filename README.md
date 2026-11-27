@@ -270,6 +270,8 @@ Movements can't be edited or deleted whatever `access` says. A trusted cleanup s
 - Quantities can be fractional and are rounded to six decimal places.
 - A lot's use-by date is a day; the whole day is usable, and it's compared in UTC.
 - With an allowance on, everyday losses are covered by it: write off only the unusual (a dropped bag, a failed batch), or it's counted twice until the next count corrects it.
+- A phone number links by its shape alone. A date or a range typed in the phone field, such as `2026-11-26`, has a phone's shape and becomes a dial link. Opening it only offers to call that number; keep notes in the notes field.
+- The website check refuses anything but http and https twice: once by the parsed scheme, once by the start of the finished address. The tests can't tell the two apart, so removing either one alone leaves them passing.
 - Kitting settings are one per site. Creating them for a site is checked against `access.manage`; keeping each site's records to its own site is your tenant plugin's job, as for supplies.
 
 ## Development
